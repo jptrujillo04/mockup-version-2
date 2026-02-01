@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { GraduationCap, Briefcase, Shield, Brain, Receipt, ArrowRight } from 'lucide-react';
+import { GraduationCap, Briefcase, Shield, Brain, Receipt, ArrowRight, X, Mail, CheckCircle } from 'lucide-react';
 
 const roles = [
     { id: 'student', label: 'Estudiante', icon: GraduationCap, path: '/student/dashboard' },
@@ -16,12 +16,37 @@ const Login: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState('rector');
     const navigate = useNavigate();
 
+    // Forgot password state
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState('');
+    const [isSendingReset, setIsSendingReset] = useState(false);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
+
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         const role = roles.find(r => r.id === selectedRole);
         if (role) {
             navigate(role.path);
         }
+    };
+
+    const handleForgotPassword = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!forgotEmail) return;
+
+        setIsSendingReset(true);
+
+        // Simulate API call
+        setTimeout(() => {
+            setIsSendingReset(false);
+            setResetEmailSent(true);
+        }, 1500);
+    };
+
+    const closeForgotPasswordModal = () => {
+        setShowForgotPassword(false);
+        setForgotEmail('');
+        setResetEmailSent(false);
     };
 
     return (
@@ -79,8 +104,8 @@ const Login: React.FC = () => {
                                             type="button"
                                             onClick={() => setSelectedRole(role.id)}
                                             className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${selectedRole === role.id
-                                                    ? 'border-primary bg-primary/5 text-primary'
-                                                    : 'border-border bg-white text-gray-500 hover:border-gray-300'
+                                                ? 'border-primary bg-primary/5 text-primary'
+                                                : 'border-border bg-white text-gray-500 hover:border-gray-300'
                                                 }`}
                                         >
                                             <Icon className="w-5 h-5 mb-1" />
@@ -95,9 +120,13 @@ const Login: React.FC = () => {
                             Ingresar
                         </Button>
 
-                        <a href="#" className="block text-center text-sm text-primary hover:underline">
+                        <button
+                            type="button"
+                            onClick={() => setShowForgotPassword(true)}
+                            className="block w-full text-center text-sm text-primary hover:underline"
+                        >
                             ¿Olvidaste tu contraseña?
-                        </a>
+                        </button>
                     </form>
 
                     {/* Direct Routes Banner */}
@@ -119,6 +148,87 @@ const Login: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center p-5 border-b border-border">
+                            <div>
+                                <h3 className="text-lg font-semibold text-text-main">Recuperar Contraseña</h3>
+                                <p className="text-sm text-gray-500">Te enviaremos un enlace de recuperación</p>
+                            </div>
+                            <button
+                                onClick={closeForgotPasswordModal}
+                                className="text-gray-400 hover:text-gray-600 p-2"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-5">
+                            {resetEmailSent ? (
+                                /* Success State */
+                                <div className="py-8 text-center">
+                                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <CheckCircle className="w-8 h-8 text-green-600" />
+                                    </div>
+                                    <h4 className="text-lg font-semibold text-text-main mb-2">¡Correo enviado!</h4>
+                                    <p className="text-gray-500 mb-6">
+                                        Hemos enviado un enlace de recuperación a<br />
+                                        <span className="font-medium text-text-main">{forgotEmail}</span>
+                                    </p>
+                                    <p className="text-sm text-gray-400 mb-6">
+                                        Revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.
+                                    </p>
+                                    <Button variant="primary" onClick={closeForgotPasswordModal} className="w-full">
+                                        Volver al inicio de sesión
+                                    </Button>
+                                </div>
+                            ) : (
+                                /* Email Form */
+                                <form onSubmit={handleForgotPassword} className="space-y-5">
+                                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Mail className="w-8 h-8 text-primary" />
+                                    </div>
+                                    <p className="text-center text-gray-600 mb-4">
+                                        Ingresa tu correo electrónico institucional y te enviaremos un enlace para restablecer tu contraseña.
+                                    </p>
+                                    <Input
+                                        label="Correo electrónico"
+                                        placeholder="usuario@talentos.edu"
+                                        type="email"
+                                        id="forgot-email"
+                                        value={forgotEmail}
+                                        onChange={(e) => setForgotEmail(e.target.value)}
+                                        required
+                                    />
+                                    <div className="flex gap-3">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={closeForgotPasswordModal}
+                                            className="flex-1"
+                                        >
+                                            Cancelar
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            variant="primary"
+                                            className="flex-1"
+                                            disabled={!forgotEmail || isSendingReset}
+                                        >
+                                            {isSendingReset ? 'Enviando...' : 'Enviar enlace'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

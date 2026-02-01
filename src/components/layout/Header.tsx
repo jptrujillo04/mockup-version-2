@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bell, Search, Command } from 'lucide-react';
-import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 
 interface HeaderProps {
@@ -30,20 +29,6 @@ export const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
-                {/* Period Selector */}
-                <div className="w-48">
-                    <Select
-                        options={[
-                            { value: '2026-t1', label: '2026 · Primer Trimestre' },
-                            { value: '2026-t2', label: '2026 · Segundo Trimestre' },
-                            { value: '2025-final', label: '2025 · Final' }
-                        ]}
-                        className="!py-1.5 !text-sm"
-                    />
-                </div>
-
-                <div className="h-6 w-px bg-gray-200 mx-1"></div>
-
                 {/* Notifications */}
                 <Button variant="ghost" size="sm" className="relative text-gray-500 w-10 h-10 p-0 rounded-full">
                     <Bell className="w-5 h-5" />

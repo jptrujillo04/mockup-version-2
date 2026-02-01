@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Select } from '../../components/ui/Select';
-import { Badge } from '../../components/ui/Badge';
 import {
     Upload,
     Download,
@@ -12,7 +11,8 @@ import {
     File,
     X,
     CheckCircle,
-    AlertCircle
+    AlertCircle,
+    Search
 } from 'lucide-react';
 
 // Types
@@ -20,20 +20,20 @@ interface Material {
     id: number;
     name: string;
     type: 'pdf' | 'video' | 'doc';
+    subjectCode: string;
     subject: string;
+    period: string;
     date: string;
 }
 
 // Mock data
 const initialMaterialsData: Material[] = [
-    { id: 1, name: 'Guía de Ecuaciones Cuadráticas', type: 'pdf', subject: 'Matemáticas 9°A', date: '2026-01-20' },
-    { id: 2, name: 'Video: Funciones Lineales', type: 'video', subject: 'Matemáticas 9°B', date: '2026-01-18' },
-    { id: 3, name: 'Ejercicios Prácticos - Unidad 3', type: 'doc', subject: 'Matemáticas 10°A', date: '2026-01-15' },
-];
-
-const activitiesData = [
-    { id: 1, name: 'Taller 1 - Ecuaciones', subject: 'Matemáticas 9°A', dueDate: '2026-02-05', submissions: 28 },
-    { id: 2, name: 'Quiz Funciones', subject: 'Matemáticas 9°B', dueDate: '2026-02-03', submissions: 25 },
+    { id: 1, name: 'Guía de Ecuaciones Cuadráticas', type: 'pdf', subjectCode: 'math-9a', subject: 'Matemáticas 9°A', period: 't1', date: '2026-01-20' },
+    { id: 2, name: 'Video: Funciones Lineales', type: 'video', subjectCode: 'math-9b', subject: 'Matemáticas 9°B', period: 't1', date: '2026-01-18' },
+    { id: 3, name: 'Ejercicios Prácticos - Unidad 3', type: 'doc', subjectCode: 'math-10a', subject: 'Matemáticas 10°A', period: 't1', date: '2026-01-15' },
+    { id: 4, name: 'Taller de Repaso - Trimestre 2', type: 'pdf', subjectCode: 'math-9a', subject: 'Matemáticas 9°A', period: 't2', date: '2026-03-10' },
+    { id: 5, name: 'Video: Álgebra Avanzada', type: 'video', subjectCode: 'math-10a', subject: 'Matemáticas 10°A', period: 't2', date: '2026-03-05' },
+    { id: 6, name: 'Guía de Trigonometría', type: 'pdf', subjectCode: 'math-9b', subject: 'Matemáticas 9°B', period: 't3', date: '2026-05-12' },
 ];
 
 const getFileIcon = (type: string) => {
@@ -62,13 +62,33 @@ const typeOptions = [
 ];
 
 const Files: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'materials' | 'activities'>('materials');
     const [materials, setMaterials] = useState<Material[]>(initialMaterialsData);
 
     // Upload form state
     const [selectedSubject, setSelectedSubject] = useState('math-9a');
     const [selectedPeriod, setSelectedPeriod] = useState('t1');
     const [selectedType, setSelectedType] = useState('material');
+
+    // Table filter state
+    const [filterPeriod, setFilterPeriod] = useState('t1');
+    const [filterSubject, setFilterSubject] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Period tabs for table
+    const periodTabs = [
+        { value: 't1', label: 'Periodo 1' },
+        { value: 't2', label: 'Periodo 2' },
+        { value: 't3', label: 'Periodo 3' },
+    ];
+
+    // Filter materials
+    const filteredMaterials = materials.filter(m => {
+        const matchesPeriod = m.period === filterPeriod;
+        const matchesSubject = filterSubject === 'all' || m.subjectCode === filterSubject;
+        const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            m.subject.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesPeriod && matchesSubject && matchesSearch;
+    });
 
     // Modal state
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -137,7 +157,9 @@ const Files: React.FC = () => {
                 name: fileName.replace(/\.[^/.]+$/, ''), // Remove extension from name
                 type: fileName.endsWith('.pdf') ? 'pdf' as const :
                     fileName.endsWith('.mp4') || fileName.endsWith('.mov') ? 'video' as const : 'doc' as const,
+                subjectCode: selectedSubject,
                 subject: subjectOptions.find(s => s.value === selectedSubject)?.label || 'Matemáticas 9°A',
+                period: selectedPeriod,
                 date: new Date().toISOString().split('T')[0],
             }));
 
@@ -211,116 +233,102 @@ const Files: React.FC = () => {
                 </div>
             </Card>
 
-            {/* Tabs */}
-            <div className="border-b border-border">
-                <div className="flex gap-1">
-                    <button
-                        onClick={() => setActiveTab('materials')}
-                        className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'materials'
-                            ? 'border-primary text-primary'
-                            : 'border-transparent text-gray-500 hover:text-text-main'
-                            }`}
-                    >
-                        Materiales de apoyo
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('activities')}
-                        className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'activities'
-                            ? 'border-primary text-primary'
-                            : 'border-transparent text-gray-500 hover:text-text-main'
-                            }`}
-                    >
-                        Actividades
-                    </button>
-                </div>
+            {/* Period Tabs */}
+            <div className="flex items-center gap-4 border-b border-border">
+                <nav className="flex">
+                    {periodTabs.map((tab) => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setFilterPeriod(tab.value)}
+                            className={`relative px-4 py-3 text-sm font-medium transition-colors ${filterPeriod === tab.value
+                                ? 'text-primary'
+                                : 'text-gray-500 hover:text-text-main'
+                                }`}
+                        >
+                            {tab.label}
+                            {filterPeriod === tab.value && (
+                                <span
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"
+                                    style={{ transform: 'translateY(1px)' }}
+                                />
+                            )}
+                        </button>
+                    ))}
+                </nav>
             </div>
 
-            {/* Materials Table */}
-            {activeTab === 'materials' && (
-                <Card>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-border">
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Archivo</th>
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Materia</th>
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Fecha</th>
-                                    <th className="text-right py-3 px-2 font-medium text-gray-500">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {materials.map((material) => (
-                                    <tr key={material.id} className="border-b border-border/50 hover:bg-gray-50">
-                                        <td className="py-3 px-2">
-                                            <div className="flex items-center gap-2">
-                                                {getFileIcon(material.type)}
-                                                <span className="font-medium">{material.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-2 text-gray-500">{material.subject}</td>
-                                        <td className="py-3 px-2 text-gray-500">{material.date}</td>
-                                        <td className="py-3 px-2 text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <Button size="sm" variant="ghost" className="p-1 h-8 w-8" title="Descargar">
-                                                    <Download className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="p-1 h-8 w-8 text-red-500"
-                                                    title="Eliminar"
-                                                    onClick={() => handleDeleteMaterial(material.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {/* Filters */}
+            <Card className="!p-4">
+                <div className="flex flex-wrap gap-4 items-end">
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Buscar</label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Buscar archivo..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                            />
+                        </div>
                     </div>
-                </Card>
-            )}
+                    <div className="w-48">
+                        <Select
+                            label="Materia"
+                            options={[{ value: 'all', label: 'Todas las materias' }, ...subjectOptions]}
+                            value={filterSubject}
+                            onChange={(e) => setFilterSubject(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </Card>
 
-            {/* Activities Table */}
-            {activeTab === 'activities' && (
-                <Card>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-border">
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Actividad</th>
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Materia</th>
-                                    <th className="text-left py-3 px-2 font-medium text-gray-500">Fecha límite</th>
-                                    <th className="text-center py-3 px-2 font-medium text-gray-500">Entregas</th>
-                                    <th className="text-right py-3 px-2 font-medium text-gray-500">Acciones</th>
+            {/* Table */}
+            <Card>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-border">
+                                <th className="text-left py-3 px-4 font-medium text-gray-500">Archivo</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-500">Materia</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-500">Fecha</th>
+                                <th className="text-right py-3 px-4 font-medium text-gray-500">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredMaterials.map((material) => (
+                                <tr key={material.id} className="border-b border-border/50 hover:bg-gray-50">
+                                    <td className="py-3 px-2">
+                                        <div className="flex items-center gap-2">
+                                            {getFileIcon(material.type)}
+                                            <span className="font-medium">{material.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="py-3 px-2 text-gray-500">{material.subject}</td>
+                                    <td className="py-3 px-2 text-gray-500">{material.date}</td>
+                                    <td className="py-3 px-2 text-right">
+                                        <div className="flex justify-end gap-1">
+                                            <Button size="sm" variant="ghost" className="p-1 h-8 w-8" title="Descargar">
+                                                <Download className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="p-1 h-8 w-8 text-red-500"
+                                                title="Eliminar"
+                                                onClick={() => handleDeleteMaterial(material.id)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {activitiesData.map((activity) => (
-                                    <tr key={activity.id} className="border-b border-border/50 hover:bg-gray-50">
-                                        <td className="py-3 px-2 font-medium">{activity.name}</td>
-                                        <td className="py-3 px-2 text-gray-500">{activity.subject}</td>
-                                        <td className="py-3 px-2 text-gray-500">{activity.dueDate}</td>
-                                        <td className="py-3 px-2 text-center">
-                                            <Badge variant="info">{activity.submissions}</Badge>
-                                        </td>
-                                        <td className="py-3 px-2 text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <Button size="sm" variant="outline">Ver entregas</Button>
-                                                <Button size="sm" variant="ghost" className="p-1 h-8 w-8 text-red-500" title="Eliminar">
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
-            )}
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
 
             {/* Upload Modal */}
             {isUploadModalOpen && (
