@@ -44,6 +44,7 @@ const navigationByRole = {
         { icon: UserCircle, label: 'Perfil', path: '/student/perfil' },
         { icon: DollarSign, label: 'Estado de cuenta', path: '/student/cuenta' },
         { icon: ClipboardList, label: 'Notas', path: '/student/notas' },
+        { icon: FileText, label: 'Boletín', path: '/student/boletin' },
         { icon: Calendar, label: 'Actividades', path: '/student/actividades' },
         { icon: Eye, label: 'Observador', path: '/student/observador' },
         { icon: FolderOpen, label: 'Material de apoyo', path: '/student/material' },
@@ -51,6 +52,7 @@ const navigationByRole = {
     ],
     teacher: [
         { icon: Home, label: 'Inicio', path: '/teacher/dashboard' },
+        { icon: BookOpen, label: 'Actividades', path: '/teacher/actividades' },
         { icon: ClipboardList, label: 'Calificar', path: '/teacher/calificar' },
         { icon: Calendar, label: 'Asistencia', path: '/teacher/asistencia' },
         { icon: FolderOpen, label: 'Archivos', path: '/teacher/archivos' },

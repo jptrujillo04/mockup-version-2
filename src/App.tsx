@@ -23,12 +23,15 @@ const StudentDashboard = React.lazy(() => import('./pages/student/Dashboard'));
 const StudentProfile = React.lazy(() => import('./pages/student/Profile'));
 const StudentAccount = React.lazy(() => import('./pages/student/AccountStatement'));
 const StudentGrades = React.lazy(() => import('./pages/student/Grades'));
+const StudentBoletin = React.lazy(() => import('./pages/student/Boletin'));
+const StudentResources = React.lazy(() => import('./pages/student/Resources'));
 const StudentActivities = React.lazy(() => import('./pages/student/Activities'));
 const StudentObserver = React.lazy(() => import('./pages/student/Observer'));
 
-// Teacher pages
 const TeacherDashboard = React.lazy(() => import('./pages/teacher/Dashboard'));
 const TeacherGrading = React.lazy(() => import('./pages/teacher/Grading'));
+const TeacherActivities = React.lazy(() => import('./pages/teacher/Activities'));
+const TeacherActivitySubmissions = React.lazy(() => import('./pages/teacher/ActivitySubmissions'));
 const TeacherAttendance = React.lazy(() => import('./pages/teacher/Attendance'));
 const TeacherFiles = React.lazy(() => import('./pages/teacher/Files'));
 const TeacherObserver = React.lazy(() => import('./pages/teacher/Observer'));
@@ -73,14 +76,17 @@ function App() {
           <Route path="/student/perfil" element={<MainLayout><StudentProfile /></MainLayout>} />
           <Route path="/student/cuenta" element={<MainLayout><StudentAccount /></MainLayout>} />
           <Route path="/student/notas" element={<MainLayout><StudentGrades /></MainLayout>} />
+          <Route path="/student/boletin" element={<MainLayout><StudentBoletin /></MainLayout>} />
           <Route path="/student/actividades" element={<MainLayout><StudentActivities /></MainLayout>} />
           <Route path="/student/observador" element={<MainLayout><StudentObserver /></MainLayout>} />
           <Route path="/student/correo" element={<MainLayout><MailPage /></MainLayout>} />
-          <Route path="/student/material" element={<MainLayout><StudentDashboard /></MainLayout>} />
+          <Route path="/student/material" element={<MainLayout><StudentResources /></MainLayout>} />
           <Route path="/student/*" element={<MainLayout><StudentDashboard /></MainLayout>} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/dashboard" element={<MainLayout><TeacherDashboard /></MainLayout>} />
+          <Route path="/teacher/actividades" element={<MainLayout><TeacherActivities /></MainLayout>} />
+          <Route path="/teacher/actividades/:id/entregas" element={<MainLayout><TeacherActivitySubmissions /></MainLayout>} />
           <Route path="/teacher/calificar" element={<MainLayout><TeacherGrading /></MainLayout>} />
           <Route path="/teacher/asistencia" element={<MainLayout><TeacherAttendance /></MainLayout>} />
           <Route path="/teacher/archivos" element={<MainLayout><TeacherFiles /></MainLayout>} />

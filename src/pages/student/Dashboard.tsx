@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -121,7 +122,7 @@ const StudentDashboard: React.FC = () => {
                 {/* Material de Apoyo */}
                 <Card
                     title="Material de Apoyo"
-                    actions={<Button size="sm" variant="primary">Ver</Button>}
+                    actions={<Link to="/student/material"><Button size="sm" variant="primary">Ver</Button></Link>}
                 >
                     <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -159,8 +160,8 @@ const StudentDashboard: React.FC = () => {
                         <div
                             key={obs.id}
                             className={`p-4 rounded-lg border-l-4 ${obs.type === 'positive'
-                                    ? 'bg-green-50 border-success'
-                                    : 'bg-orange-50 border-alert'
+                                ? 'bg-green-50 border-success'
+                                : 'bg-orange-50 border-alert'
                                 }`}
                         >
                             <div className="flex justify-between items-start">
